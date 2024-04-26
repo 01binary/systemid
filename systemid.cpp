@@ -1,7 +1,4 @@
-//
-// Includes
-//
-
+// Example of third order system model
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -9,16 +6,8 @@
 #include <random>
 #include <Eigen/Dense>
 
-//
-// Namespaces
-//
-
 using namespace std;
 using namespace Eigen;
-
-//
-// Constants
-//
 
 // A weights (3x3 matrix)
 const MatrixXd A
@@ -50,10 +39,6 @@ const double DISTURBANCE_VAR = 841.9616;
 // Files
 const char* INPUT = "input.csv";
 const char* OUTPUT = "output.csv";
-
-//
-// Functions
-//
 
 // Cx + Du + e
 double systemModel(
