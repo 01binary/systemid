@@ -76,6 +76,8 @@ bool openOutput(const string& path, ofstream& file)
 
   // Write output headers
   file << "time,prediction,measurement" << endl;
+
+  return true;
 }
 
 bool openInput(const string& path, ifstream& file)
@@ -86,6 +88,8 @@ bool openInput(const string& path, ifstream& file)
   // Skip headers
   string headers;
   getline(file, headers);
+
+  return true;
 }
 
 int main(int argc, char** argv)
