@@ -68,14 +68,24 @@ RowVectorXd systemState(
 
 bool openOutput(const string& path, ofstream& file)
 {
+  // Delete if exists
+  std::remove(OUTPUT);
+
   file.open(path);
-  return file.is_open();
+  if (!file.is_open()) return false;
+
+  // Write output headers
+  file << "time,prediction,measurement" << endl;
 }
 
 bool openInput(const string& path, ifstream& file)
 {
   file.open(path);
-  return file.is_open();
+  if (!file.is_open()) return false;
+
+  // Skip headers
+  string headers;
+  getline(file, headers);
 }
 
 int main(int argc, char** argv)
@@ -91,7 +101,6 @@ int main(int argc, char** argv)
 
   // Open output
   ofstream outputFile;
-  std::remove(OUTPUT);
 
   if (!openOutput(OUTPUT, outputFile))
   {
@@ -107,21 +116,17 @@ int main(int argc, char** argv)
 
   // System state
   RowVectorXd x = x0;
-  string line;
+
+  // Simulation
   double lastTime = 0.0;
-
-  // Skip input headers
-  getline(inputFile, line);
-
-  // Write output headers
-  outputFile << "time,prediction,measurement" << endl;
+  string line;
 
   while(!inputFile.eof())
   {
-    // Read time, input, output
-    double time, input, measurement;
+    // Read time, measurement, input
+    double time, measurement, input;
     getline(inputFile, line);
-    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &input, &measurement);
+    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &measurement, &input);
 
     // Calculate time step
     double timeStep = lastTime - time;
