@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <limits>
 #include <Eigen/Dense>
 
 using namespace std;
@@ -92,6 +93,21 @@ bool openInput(const string& path, ifstream& file)
   return true;
 }
 
+void read(ifstream& file, double& time, double& measurement, double& input, double& timeStep)
+{
+  static string line;
+  static double lastTime = numeric_limits<double>::infinity();
+
+  getline(file, line);
+  sscanf(line.c_str(), "%lf, %lf, %lf", &time, &measurement, &input);
+
+  timeStep = lastTime == numeric_limits<double>::infinity()
+    ? 0.0
+    : lastTime - time;
+
+  lastTime = time;
+}
+
 int main(int argc, char** argv)
 {
   // Open input
@@ -122,19 +138,11 @@ int main(int argc, char** argv)
   RowVectorXd x = x0;
 
   // Simulation
-  double lastTime = 0.0;
-  string line;
-
   while(!inputFile.eof())
   {
-    // Read time, measurement, input
-    double time, measurement, input;
-    getline(inputFile, line);
-    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &measurement, &input);
-
-    // Calculate time step
-    double timeStep = lastTime - time;
-    lastTime = time;
+    // Read inputs
+    double time, measurement, input, timeStep;
+    read(inputFile, time, measurement, input, timeStep);
 
     // Simulate disturbance
     double e = dist(gen);
