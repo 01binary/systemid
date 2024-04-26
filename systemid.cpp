@@ -140,7 +140,7 @@ int main(int argc, char** argv)
   // Simulation
   while(!inputFile.eof())
   {
-    // Read inputs
+    // Input
     double time, measurement, input, timeStep;
     read(inputFile, time, measurement, input, timeStep);
 
