@@ -105,7 +105,7 @@ int main(int argc, char** argv)
   normal_distribution<double> dist(
     DISTURBANCE_MEAN, DISTURBANCE_VAR);
 
-  // Kalman filter
+  // System state
   RowVectorXd x = x0;
   string line;
   double lastTime = 0.0;
