@@ -23,29 +23,33 @@ using namespace Eigen;
 // A weights (3x3 matrix)
 const MatrixXd A
 {
-  { -0.1199, 2.0558, 1.1026 },
-  { -1.8226, -0.7465, -15.0483 },
-  { 0.7375,  8.2928,  -16.6951 }
+  {  0.0356,   -3.4131,  -14.9525 },
+  { -1.0591,   85.8128,  334.3098 },
+  {  1.5729,  -95.1123, -175.5517 }
 };
 
 // B weights (3x1 vector)
-const RowVectorXd B {{ 0.0009, 0.1359, 0.3223 }};
+const RowVectorXd B {{ -0.0019, 0.0403, -0.0225 }};
 
 // C weights (1x3 vector)
-const VectorXd C {{ -32.1738, -0.7282, 0.1308 }};
+const VectorXd C {{ -5316.9, 24.87, 105.92 }};
 
 // D weight (scalar)
-const double D = 8.7666e-04;
+const double D = 0;
 
 // K weights (3x1 vector)
-const RowVectorXd K {{ -1.3722, -4.1560, 12.5563 }};
+const RowVectorXd K {{ -0.0025, -0.0582, 0.0984 }};
 
 // x0 initial state (3x1 vector)
-const RowVectorXd x0 {{ 0.0, 0.0, 0.0 }};
+const RowVectorXd x0 {{ -0.0458, 0.0099, -0.0139 }};
 
 // Disturbance
 const double DISTURBANCE_MEAN = 0.0;
 const double DISTURBANCE_VAR = 841.9616;
+
+// Files
+const char* INPUT = "input.csv";
+const char* OUTPUT = "output.csv";
 
 //
 // Functions
@@ -70,7 +74,7 @@ RowVectorXd systemState(
 {
   return
     // Add contribution of state
-    A * x +
+    x * A +
     // Add contribution of input
     B * u +
     // Add contribution of disturbance
@@ -92,18 +96,19 @@ bool openInput(const string& path, ifstream& file)
 int main(int argc, char** argv)
 {
   // Open input
-  ifstream input;
+  ifstream inputFile;
 
-  if (!openInput("input.csv", input))
+  if (!openInput(INPUT, inputFile))
   {
     cerr << "Failed to open input file" << endl;
     return 1;
   }
 
   // Open output
-  ofstream output;
+  ofstream outputFile;
+  std::remove(OUTPUT);
 
-  if (!openOutput("output.csv", output))
+  if (!openOutput(OUTPUT, outputFile))
   {
     cerr << "Failed to open output file" << endl;
     return 1;
@@ -120,27 +125,34 @@ int main(int argc, char** argv)
   string line;
   double lastTime = 0.0;
 
-  // Skip headers
-  getline(input, line);
+  // Skip input headers
+  getline(inputFile, line);
 
-  while(!input.eof())
+  // Write output headers
+  outputFile << "time,prediction,measurement" << endl;
+
+  while(!inputFile.eof())
   {
     // Read time, input, output
-    double time, u, y;
-    getline(input, line);
-    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &u, &y);
+    double time, input, measurement;
+    getline(inputFile, line);
+    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &input, &measurement);
 
     // Calculate time step
     double timeStep = lastTime - time;
     lastTime = time;
 
+    // Simulate disturbance
+    double e = dist(gen);
+
     // Predict
-    double estimate = systemModel(x, u, 0.0);
+    double prediction = systemModel(x, input, e);
 
     // Update state
-    x = systemState(x, u, 0.0);
+    x = systemState(x, input, e) * timeStep;
 
-    output << estimate << endl;
+    // Output
+    outputFile << time << "," << prediction << "," << measurement << endl;
   }
 
   return 0;
