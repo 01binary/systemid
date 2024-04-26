@@ -1,11 +1,24 @@
+//
+// Includes
+//
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <random>
 #include <Eigen/Dense>
+
+//
+// Namespaces
+//
 
 using namespace std;
 using namespace Eigen;
+
+//
+// Constants
+//
 
 // A weights (3x3 matrix)
 const MatrixXd A
@@ -27,8 +40,19 @@ const double D = 8.7666e-04;
 // K weights (3x1 vector)
 const RowVectorXd K {{ -1.3722, -4.1560, 12.5563 }};
 
+// x0 initial state (3x1 vector)
+const RowVectorXd x0 {{ 0.0, 0.0, 0.0 }};
+
+// Disturbance
+const double DISTURBANCE_MEAN = 0.0;
+const double DISTURBANCE_VAR = 841.9616;
+
+//
+// Functions
+//
+
 // Cx + Du + e
-double systemPositionModel(
+double systemModel(
   const RowVector3d& x, double u, double e)
 {
   return
@@ -41,35 +65,17 @@ double systemPositionModel(
 }
 
 // Ax + Bu + Ke
-double systemVelocityModel(
+RowVectorXd systemState(
   const RowVectorXd& x, double u, double e)
 {
-  RowVectorXd dxdt =
+  return
     // Add contribution of state
     A * x +
     // Add contribution of input
     B * u +
     // Add contribution of disturbance
     K * e;
-
-  // Sum contributions
-  return dxdt.block(0, 0, B.rows(), B.cols()).sum();
 }
-
-/*
-while (getline(file, ID, ',')) {
-    cout << "ID: " << ID << " " ; 
-
-    getline(file, nome, ',') ;
-    cout << "User: " << nome << " " ;
-
-    getline(file, idade, ',') ;
-    cout << "Idade: " << idade << " "  ; 
-
-    getline(file, genero);
-    cout << "Sexo: " <<  genero<< " "  ;
-}
-*/
 
 bool openOutput(const string& path, ofstream& file)
 {
@@ -103,23 +109,38 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  // Skip headers
-  string headers;
-  getline(input, headers);
+  // Disturbance
+  random_device rd;
+  mt19937 gen(rd());
+  normal_distribution<double> dist(
+    DISTURBANCE_MEAN, DISTURBANCE_VAR);
 
-  // Simulate
-  RowVectorXd x {{ 0.0, 0.0, 0.0 }};
+  // Kalman filter
+  RowVectorXd x = x0;
   string line;
+  double lastTime = 0.0;
+
+  // Skip headers
+  getline(input, line);
 
   while(!input.eof())
   {
-    double t = 0.0;
-    double y = 0.0;
-    double u = 0.0;
-
+    // Read time, input, output
+    double time, u, y;
     getline(input, line);
+    sscanf(line.c_str(), "%lf, %lf, %lf", &time, &u, &y);
 
-    output << y << endl;
+    // Calculate time step
+    double timeStep = lastTime - time;
+    lastTime = time;
+
+    // Predict
+    double estimate = systemModel(x, u, 0.0);
+
+    // Update state
+    x = systemState(x, u, 0.0);
+
+    output << estimate << endl;
   }
 
   return 0;
