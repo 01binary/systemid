@@ -16,7 +16,7 @@ B = [ ...
 C = [ -5316.9, 24.87, 105.92 ];
 
 % D weight (scalar)
-D = 0.05;
+D = 0;
 
 % K weights (3x1 vector)
 K = [ ...
