@@ -34,8 +34,6 @@ x0 = [ ...
 
 % Read input file
 csv = readmatrix('https://raw.githubusercontent.com/01binary/systemid/main/input.csv');
-
-% Select column vectors
 time = csv(:,1);
 measurement = csv(:,2);
 input = csv(:,3);
@@ -46,8 +44,7 @@ timeStep = 0.02;
 output = zeros(length(input), 1);
 
 for i = 1:length(input)
-  t = time(1) + (i - 1) * timeStep;
-  u = interp1(time, input, t);
+  u = input(i);
   [y, dx] = systemModel(A, B, C, D, K, x, u, 0);
   x = x + dx * timeStep;
   output(i) = y;
@@ -63,7 +60,7 @@ function [y, dx] = systemModel(A, B, C, D, K, x, u, e)
     D * u + ...  % Add contribution of input
     e;           % Add disturbance
 
-  % dx/dt = Ax + Bu + Ke
+  % x = Ax + Bu + Ke
   dx = ...
     A * x + ... % Add contribution of state
     B * u + ... % Add contribution of input
