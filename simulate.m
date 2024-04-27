@@ -1,28 +1,28 @@
 % A weights (3x3 matrix)
 A = [ ...
-  0.0356,   -3.4131,  -14.9525;
-  -1.0591,   85.8128,  334.3098;
-  1.5729,  -95.1123, -175.5517;
+  0.9988,   0.05193,  -0.02261;
+  0.02222,   -0.01976,  0.7353;
+  0.0009856,  -0.2093, -0.5957;
 ];
 
 % B weights (3x1 vector)
 B = [ ...
-  -0.0019;
-  0.0403;
-  -0.0225;
+  -2.663e-06;
+  5.727e-05;
+  -0.0001872;
 ];
 
 % C weights (1x3 vector)
-C = [ -5316.9, 24.87, 105.92 ];
+C = [ -5317, 24.87, 105.9 ];
 
 % D weight (scalar)
 D = 0;
 
 % K weights (3x1 vector)
 K = [ ...
-  -0.0025;
-  -0.0582;
-  0.0984;
+  -0.0001655;
+  -0.001508;
+  6.209e-06;
 ];
 
 % Initial state (3x1 vector)
@@ -40,13 +40,12 @@ input = csv(:,3);
 
 % Simulate
 x = x0;
-timeStep = 0.02;
 output = zeros(length(input), 1);
 
 for i = 1:length(input)
   u = input(i);
   [y, dx] = systemModel(A, B, C, D, K, x, u, 0);
-  x = x + dx * timeStep;
+  x = x + dx;
   output(i) = y;
 end
 
@@ -60,7 +59,7 @@ function [y, dx] = systemModel(A, B, C, D, K, x, u, e)
     D * u + ...  % Add contribution of input
     e;           % Add disturbance
 
-  % x = Ax + Bu + Ke
+  % dx = Ax + Bu + Ke
   dx = ...
     A * x + ... % Add contribution of state
     B * u + ... % Add contribution of input
