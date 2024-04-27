@@ -40,12 +40,13 @@ input = csv(:,3);
 
 % Simulate
 x = x0;
+timeStep = 0.02;
 output = zeros(length(input), 1);
 
 for i = 1:length(input)
   u = input(i);
   [y, dx] = systemModel(A, B, C, D, K, x, u, 0);
-  x = x + dx;
+  x = x + dx * timeStep;
   output(i) = y;
 end
 
