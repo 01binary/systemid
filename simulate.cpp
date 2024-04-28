@@ -55,7 +55,7 @@ const double ed = 2.239914935143708e+02;
 const char* INPUT = "input.csv";
 const char* OUTPUT = "output.csv";
 
-double systemModel(RowVector3d& x, double u, double e)
+double systemModel(RowVectorXd& x, double u, double e)
 {
   // y = Cx + Du + e
   double y =
@@ -68,6 +68,8 @@ double systemModel(RowVector3d& x, double u, double e)
 
   // x = Ax + Bu + Ke
   x = x * A + B * u + K * e;
+
+  return y;
 }
 
 bool openOutput(const string& path, ofstream& file)
@@ -96,19 +98,11 @@ bool openInput(const string& path, ifstream& file)
   return true;
 }
 
-void read(ifstream& file, double& time, double& measurement, double& input, double& timeStep)
+void read(ifstream& file, double& time, double& measurement, double& input)
 {
   static string line;
-  static double lastTime = numeric_limits<double>::infinity();
-
   getline(file, line);
   sscanf(line.c_str(), "%lf, %lf, %lf", &time, &measurement, &input);
-
-  timeStep = lastTime == numeric_limits<double>::infinity()
-    ? 0.0
-    : lastTime - time;
-
-  lastTime = time;
 }
 
 int main(int argc, char** argv)
@@ -143,8 +137,8 @@ int main(int argc, char** argv)
   while(!inputFile.eof())
   {
     // Input
-    double time, measurement, input, timeStep;
-    read(inputFile, time, measurement, input, timeStep);
+    double time, measurement, input;
+    read(inputFile, time, measurement, input);
 
     // Predict
     double prediction = systemModel(x, input, dist(gen));
