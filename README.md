@@ -2,7 +2,7 @@
 
 This is a companion repository for an article about the Kalman filter.
 
-We identify a system by using System Identification app in Matlab from [input.csv](./input.csv) file, using a discrete state-space model:
+We identify a discrete state-space system by using System Identification app in Matlab from [input.csv](./input.csv) file:
 
 ```
 % Predict
@@ -12,7 +12,7 @@ y = Cx + Du + e
 x = Ax + Bu + Ke
 ```
 
-Sample code in this repository then demonstrates how to use these two equations in practice for simulation and prediction.
+Sample code in this repository then demonstrates how to use these two equations in practice.
 
 The code is provided in Matlab (.m) and C++ (.cpp). Since Matlab is essentially a Python REPL, it should be easy to convert the Matlab script to Python.
 
