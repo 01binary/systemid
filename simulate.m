@@ -7,13 +7,17 @@ A = [ ...
 
 % B weights (3x1 vector)
 B = [ ...
-  -2.663e-06;
-  5.727e-05;
-  -0.0001872;
+  -0.00000266;
+  0.0000572747;
+  -0.0001872152;
 ];
 
 % C weights (1x3 vector)
-C = [ -5317, 24.87, 105.9 ];
+C = [ ...
+  -5316.903919, ...
+  24.867656, ...
+  105.92416 ...
+];
 
 % D weight (scalar)
 D = 0;
@@ -32,7 +36,7 @@ x0 = [ ...
   -0.0139;
 ];
 
-% Read input file
+% Read input
 csv = readmatrix('https://raw.githubusercontent.com/01binary/systemid/main/input.csv');
 time = csv(:,1);
 measurement = csv(:,2);
@@ -40,28 +44,26 @@ input = csv(:,3);
 
 % Simulate
 x = x0;
-timeStep = 0.02;
 output = zeros(length(input), 1);
 
 for i = 1:length(input)
   u = input(i);
-  [y, dx] = systemModel(A, B, C, D, K, x, u, 0);
-  x = x + dx * timeStep;
+  [y, x] = systemModel(A, B, C, D, K, x, u, 0);
   output(i) = y;
 end
 
-% Plot against original measurements
+% Plot
 plot(time, measurement, time, output);
 
-function [y, dx] = systemModel(A, B, C, D, K, x, u, e)
+function [y, x] = systemModel(A, B, C, D, K, x, u, e)
   % y = Cx + Du + e
   y = ...
     C * x + ...  % Add contribution of state
     D * u + ...  % Add contribution of input
     e;           % Add disturbance
 
-  % dx = Ax + Bu + Ke
-  dx = ...
+  % x = Ax + Bu + Ke
+  x = ...
     A * x + ... % Add contribution of state
     B * u + ... % Add contribution of input
     e * K;      % Add contribution of disturbance
