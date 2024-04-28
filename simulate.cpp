@@ -50,7 +50,7 @@ const RowVectorXd x0 {{
 
 /*
   * Discrete state-space system model
-  * @param x: system state (updated)
+  * @param x: system state to update
   * @param u: system input
   * @param e: disturbance
   * @return: system output

@@ -1,5 +1,6 @@
 build
 output.csv
+.DS_Store
 
 # Prerequisites
 *.d
