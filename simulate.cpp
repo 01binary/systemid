@@ -48,15 +48,17 @@ const RowVectorXd x0 {{
   -0.0139
 }};
 
-// Disturbance variance
-const double ed = 2.239914935143708e+02;
-
-// Files
-const char* INPUT = "input.csv";
-const char* OUTPUT = "output.csv";
-
-double systemModel(RowVectorXd& x, double u, double e)
+/*
+  * Discrete state-space system model
+  * @param x: system state (updated)
+  * @param u: system input
+  * @param e: disturbance
+  * @return: system output
+*/
+double systemModel(
+  RowVectorXd& x, double u, double e)
 {
+  // Predict
   // y = Cx + Du + e
   double y =
     // Add contribution of state
@@ -66,28 +68,39 @@ double systemModel(RowVectorXd& x, double u, double e)
     // Add disturbance
     e;
 
+  // Update state
   // x = Ax + Bu + Ke
-  x = x * A + B * u + K * e;
+  x =
+    // Add contribution of state
+    x * A +
+    // Add contribution of input
+    B * u +
+    // Add contribution of disturbance
+    K * e;
 
   return y;
 }
 
-bool openOutput(const string& path, ofstream& file)
+bool openOutput(
+  const string& path, ofstream& file)
 {
   // Delete if exists
-  std::remove(OUTPUT);
+  remove(path.c_str());
 
+  // Open file for writing
   file.open(path);
   if (!file.is_open()) return false;
 
-  // Write output headers
+  // Write headers
   file << "time,prediction,measurement" << endl;
 
   return true;
 }
 
-bool openInput(const string& path, ifstream& file)
+bool openInput(
+  const string& path, ifstream& file)
 {
+  // Open file for reading
   file.open(path);
   if (!file.is_open()) return false;
 
@@ -98,53 +111,57 @@ bool openInput(const string& path, ifstream& file)
   return true;
 }
 
-void read(ifstream& file, double& time, double& measurement, double& input)
+bool read(
+  ifstream& file,
+  double& time,
+  double& measurement,
+  double& input)
 {
   static string line;
   getline(file, line);
-  sscanf(line.c_str(), "%lf, %lf, %lf", &time, &measurement, &input);
+
+  sscanf(
+    line.c_str(),
+    "%lf, %lf, %lf",
+    &time,
+    &measurement,
+    &input);
+
+  return !file.eof();
 }
 
 int main(int argc, char** argv)
 {
-  // Open input
   ifstream inputFile;
 
-  if (!openInput(INPUT, inputFile))
+  if (!openInput("input.csv", inputFile))
   {
     cerr << "Failed to open input file" << endl;
     return 1;
   }
 
-  // Open output
   ofstream outputFile;
 
-  if (!openOutput(OUTPUT, outputFile))
+  if (!openOutput("output.csv", outputFile))
   {
     cerr << "Failed to open output file" << endl;
     return 1;
   }
 
-  // Disturbance
-  random_device rd;
-  mt19937 gen(rd());
-  normal_distribution<double> dist(0.0, ed);
+  RowVectorXd state = x0;
+  double time, measurement, input;
+  double disturbance = 0.0;
 
-  // System state
-  RowVectorXd x = x0;
-
-  // Simulation
-  while(!inputFile.eof())
+  while(read(inputFile, time, measurement, input))
   {
-    // Input
-    double time, measurement, input;
-    read(inputFile, time, measurement, input);
+    double prediction = systemModel(
+      state, input, disturbance);
 
-    // Predict
-    double prediction = systemModel(x, input, dist(gen));
-
-    // Output
-    outputFile << time << "," << prediction << "," << measurement << endl;
+    outputFile
+      << time << ","
+      << prediction << ","
+      << measurement
+      << endl;
   }
 
   return 0;
