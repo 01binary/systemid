@@ -1,4 +1,3 @@
-// Example of third order system model
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -13,58 +12,62 @@ using namespace Eigen;
 // A weights (3x3 matrix)
 const MatrixXd A
 {
-  {  0.0356,   -3.4131,  -14.9525 },
-  { -1.0591,   85.8128,  334.3098 },
-  {  1.5729,  -95.1123, -175.5517 }
+  { 0.998800,   0.05193, -0.02261 },
+  { 0.0222200, -0.01976,  0.7353  },
+  { 0.0009856, -0.20930, -0.5957  }
 };
 
 // B weights (3x1 vector)
-const RowVectorXd B {{ -0.0019, 0.0403, -0.0225 }};
+const RowVectorXd B {{
+  -0.00000266,
+  0.0000572747,
+  -0.0001872152
+}};
 
 // C weights (1x3 vector)
-const VectorXd C {{ -5316.9, 24.87, 105.92 }};
+const VectorXd C {{
+  -5316.903919,
+  24.867656,
+  105.92416
+}};
 
 // D weight (scalar)
 const double D = 0;
 
 // K weights (3x1 vector)
-const RowVectorXd K {{ -0.0025, -0.0582, 0.0984 }};
+const RowVectorXd K {{
+  -0.0001655,
+  -0.001508,
+  6.209e-06
+}};
 
-// x0 initial state (3x1 vector)
-const RowVectorXd x0 {{ -0.0458, 0.0099, -0.0139 }};
+// Initial state (3x1 vector)
+const RowVectorXd x0 {{
+  -0.0458,
+  0.0099,
+  -0.0139
+}};
 
-// Disturbance
-const double DISTURBANCE_MEAN = 0.0;
-const double DISTURBANCE_VAR = 841.9616;
+// Disturbance variance
+const double ed = 2.239914935143708e+02;
 
 // Files
 const char* INPUT = "input.csv";
 const char* OUTPUT = "output.csv";
 
-// Cx + Du + e
-double systemModel(
-  const RowVector3d& x, double u, double e)
+double systemModel(RowVector3d& x, double u, double e)
 {
-  return
+  // y = Cx + Du + e
+  double y =
     // Add contribution of state
-    (C * x).sum() +
+    C.dot(x) +
     // Add contribution of input
     D * u +
     // Add disturbance
     e;
-}
 
-// Ax + Bu + Ke
-RowVectorXd systemState(
-  const RowVectorXd& x, double u, double e)
-{
-  return
-    // Add contribution of state
-    x * A +
-    // Add contribution of input
-    B * u +
-    // Add contribution of disturbance
-    K * e;
+  // x = Ax + Bu + Ke
+  x = x * A + B * u + K * e;
 }
 
 bool openOutput(const string& path, ofstream& file)
@@ -131,8 +134,7 @@ int main(int argc, char** argv)
   // Disturbance
   random_device rd;
   mt19937 gen(rd());
-  normal_distribution<double> dist(
-    DISTURBANCE_MEAN, DISTURBANCE_VAR);
+  normal_distribution<double> dist(0.0, ed);
 
   // System state
   RowVectorXd x = x0;
@@ -144,14 +146,8 @@ int main(int argc, char** argv)
     double time, measurement, input, timeStep;
     read(inputFile, time, measurement, input, timeStep);
 
-    // Simulate disturbance
-    double e = dist(gen);
-
     // Predict
-    double prediction = systemModel(x, input, e);
-
-    // Update state
-    x = systemState(x, input, e) * timeStep;
+    double prediction = systemModel(x, input, dist(gen));
 
     // Output
     outputFile << time << "," << prediction << "," << measurement << endl;
