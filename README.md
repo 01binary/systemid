@@ -2,7 +2,7 @@
 
 This is a companion repository for an article about the Kalman filter.
 
-We identify a discrete state-space system by using System Identification app in Matlab from [input.csv](./input.csv) file:
+In the article we identify a discrete state-space system by using System Identification app in Matlab from [input.csv](./input.csv) file:
 
 ```
 % Predict
