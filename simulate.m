@@ -53,11 +53,11 @@ inputs = csv(:,3);
 outputs = zeros(length(inputs), 1);
 
 % Simulate
-systemState = initialState;
+state = initialState;
 
 for i = 1:length(inputs)
   input = inputs(i);
-  [prediction, systemState] = systemModel(systemState, input, disturbance);
+  [prediction, state] = systemModel(state, input, disturbance);
   outputs(i) = prediction;
 end
 
