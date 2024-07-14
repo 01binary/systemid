@@ -18,14 +18,14 @@ const MatrixXd A
 };
 
 // B weights (3x1 vector)
-const RowVectorXd B {{
+const VectorXd B {{
   -0.00000266,
   0.0000572747,
   -0.0001872152
 }};
 
 // C weights (1x3 vector)
-const VectorXd C {{
+const RowVectorXd C {{
   -5316.903919,
   24.867656,
   105.92416
@@ -35,7 +35,7 @@ const VectorXd C {{
 const double D = 0;
 
 // Initial state (3x1 vector)
-const RowVectorXd x0 {{
+const VectorXd x0 {{
   -0.0458,
   0.0099,
   -0.0139
@@ -48,7 +48,7 @@ const RowVectorXd x0 {{
   * @returns: system output
 */
 double systemModel(
-  RowVectorXd& x, double u)
+  VectorXd& x, double u)
 {
   // Predict
   // y = Cx + Du
@@ -62,7 +62,7 @@ double systemModel(
   // x = Ax + Bu + Ke
   x =
     // Transition state
-    x * A +
+    A * x +
     // Control state
     B * u;
 
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  RowVectorXd state = x0;
+  VectorXd state = x0;
   double time, measurement, input;
 
   while(read(inputFile, time, measurement, input))
