@@ -34,13 +34,6 @@ const VectorXd C {{
 // D weight (scalar)
 const double D = 0;
 
-// K weights (3x1 vector)
-const RowVectorXd K {{
-  -0.0001655,
-  -0.001508,
-  6.209e-06
-}};
-
 // Initial state (3x1 vector)
 const RowVectorXd x0 {{
   -0.0458,
@@ -52,31 +45,26 @@ const RowVectorXd x0 {{
   * Discrete state-space system model
   * @param x: system state to update
   * @param u: system input
-  * @param e: disturbance
-  * @return: system output
+  * @returns: system output
 */
 double systemModel(
-  RowVectorXd& x, double u, double e)
+  RowVectorXd& x, double u)
 {
   // Predict
-  // y = Cx + Du + e
+  // y = Cx + Du
   double y =
     // Add contribution of state
     C.dot(x) +
     // Add contribution of input
-    D * u +
-    // Add disturbance
-    e;
+    D * u;
 
   // Update state
   // x = Ax + Bu + Ke
   x =
-    // Add contribution of state
+    // Transition state
     x * A +
-    // Add contribution of input
-    B * u +
-    // Add contribution of disturbance
-    K * e;
+    // Control state
+    B * u;
 
   return y;
 }
@@ -150,12 +138,11 @@ int main(int argc, char** argv)
 
   RowVectorXd state = x0;
   double time, measurement, input;
-  double disturbance = 0.0;
 
   while(read(inputFile, time, measurement, input))
   {
     double prediction = systemModel(
-      state, input, disturbance);
+      state, input);
 
     outputFile
       << time << ","

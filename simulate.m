@@ -2,7 +2,6 @@ global A;
 global B;
 global C;
 global D;
-global K;
 
 % A weights (3x3 matrix)
 A = [ ...
@@ -28,22 +27,12 @@ C = [ ...
 % D weight (scalar)
 D = 0;
 
-% K weights (3x1 vector)
-K = [ ...
-  -0.0001655;
-  -0.001508;
-  6.209e-06;
-];
-
 % Initial state (3x1 vector)
 initialState = [ ...
   -0.0458;
   0.0099;
   -0.0139;
 ];
-
-% Disturbance
-disturbance = 0;
 
 % Read input
 csv = readmatrix('https://raw.githubusercontent.com/01binary/systemid/main/input.csv');
@@ -57,7 +46,7 @@ state = initialState;
 
 for i = 1:length(inputs)
   input = inputs(i);
-  [prediction, state] = systemModel(state, input, disturbance);
+  [prediction, state] = systemModel(state, input);
   outputs(i) = prediction;
 end
 
@@ -65,22 +54,19 @@ end
 plot(time, measurements, time, outputs);
 
 % Linear discrete system model
-function [y, x] = systemModel(x, u, e)
+function [y, x] = systemModel(x, u)
   global A;
   global B;
   global C;
   global D;
-  global K;
 
-  % y = Cx + Du + e
+  % y = Cx + Du
   y = ...
-    C * x + ...  % Add contribution of state
-    D * u + ...  % Add contribution of input
-    e;           % Add disturbance
+    C * x + ... % Map state to output
+    D * u;      % Map input to output
 
-  % x = Ax + Bu + Ke
+  % x = Ax + Bu
   x = ...
-    A * x + ... % Add contribution of state
-    B * u + ... % Add contribution of input
-    e * K;      % Add contribution of disturbance
+    A * x + ... % Transition state
+    B * u;      % Control state
 end
