@@ -59,7 +59,7 @@ double systemModel(
     D * u;
 
   // Update state
-  // x = Ax + Bu + Ke
+  // x = Ax + Bu
   x =
     // Transition state
     A * x +
