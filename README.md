@@ -36,16 +36,17 @@ The C++ example can be built and executed with the following steps.
 
 ## Building
 
-+ Configure: `cmake .`
++ Create a build folder: `mkdir build && cd build`
++ Setup CMake: `cmake ..`
 + Build: `make`
-+ This should create `kalman` executable
++ This should create `simulate` executable in `build` folder
 
 ## Running
 
 Run the demo from the current directory:
 
 ```
-./kalman
+./build/simulate
 ```
 
 This will read inputs from `input.csv` and write filtered result into `output.csv`.
@@ -54,7 +55,7 @@ This will read inputs from `input.csv` and write filtered result into `output.cs
 
 Re-configure the build to add symbols and launch with LLDB debugger:
 
-+ Setup CMake: `cmake . -DCMAKE_BUILD_TYPE=Debug`
++ Setup CMake from `build` folder: `cmake .. -DCMAKE_BUILD_TYPE=Debug`
 + Build: `make`
 + Open this folder in VSCode
 + Switch to Debug tab
